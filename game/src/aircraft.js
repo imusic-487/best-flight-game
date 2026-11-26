@@ -31,20 +31,20 @@ export function drawAircraft(ctx, cx, cy, width, plane, time) {
   drawWing(ctx, scale, -1);
   drawWing(ctx, scale, 1);
 
-  // Tailplane (horizontal stabiliser) and fin.
+  // Tailplane (horizontal stabiliser) and fin, tucked against the fuselage.
   ctx.fillStyle = '#c65a2e';
   ctx.beginPath();
-  ctx.moveTo(-34 * scale, 26 * scale);
-  ctx.lineTo(-58 * scale, 44 * scale);
-  ctx.lineTo(-52 * scale, 50 * scale);
-  ctx.lineTo(-20 * scale, 36 * scale);
+  ctx.moveTo(-32 * scale, 22 * scale);
+  ctx.lineTo(-56 * scale, 38 * scale);
+  ctx.lineTo(-50 * scale, 44 * scale);
+  ctx.lineTo(-18 * scale, 32 * scale);
   ctx.closePath();
   ctx.fill();
   ctx.beginPath();
-  ctx.moveTo(34 * scale, 26 * scale);
-  ctx.lineTo(58 * scale, 44 * scale);
-  ctx.lineTo(52 * scale, 50 * scale);
-  ctx.lineTo(20 * scale, 36 * scale);
+  ctx.moveTo(32 * scale, 22 * scale);
+  ctx.lineTo(56 * scale, 38 * scale);
+  ctx.lineTo(50 * scale, 44 * scale);
+  ctx.lineTo(18 * scale, 32 * scale);
   ctx.closePath();
   ctx.fill();
 
@@ -105,6 +105,22 @@ export function drawAircraft(ctx, cx, cy, width, plane, time) {
     ctx.beginPath();
     ctx.arc(0, 46 * scale, 4 * scale, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  // Wingtip vortices: faint trailing wisps when the pilot banks hard.
+  if (Math.abs(plane.bank) > 28 && !plane.onGround) {
+    const strength = (Math.abs(plane.bank) - 28) / 34;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 * strength})`;
+    ctx.lineWidth = 2.5 * scale;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(side * 116 * scale, 8 * scale);
+      ctx.quadraticCurveTo(
+        side * 128 * scale, 26 * scale,
+        side * (116 + Math.sin(time * 2 + side) * 6) * scale, 44 * scale,
+      );
+      ctx.stroke();
+    }
   }
 
   // Damage smoke: thin grey puffs from the engine when hurt.

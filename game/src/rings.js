@@ -84,10 +84,11 @@ function drawRing(ctx, plane, ring, view, time, isNext) {
     ctx.stroke();
   }
 
-  // Ring number, floating above the ring.
-  if (p.radius > 14) {
+  // Ring number, floating above the ring (never a giant when close).
+  // The next ring gets the guidance diamond instead, so skip its number.
+  if (p.radius > 14 && p.radius < 110 && !isNext) {
     ctx.fillStyle = isNext ? '#ffcf5e' : '#dff6ff';
-    ctx.font = `700 ${Math.max(12, p.radius * 0.5)}px monospace`;
+    ctx.font = `700 ${Math.max(12, Math.min(26, p.radius * 0.5))}px monospace`;
     ctx.textAlign = 'center';
     ctx.fillText(String(ring.index + 1), p.x, p.y - p.radius - 10);
   }

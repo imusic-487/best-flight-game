@@ -67,7 +67,8 @@ export function createAudio() {
     }
   };
 
-  // Continuous update: engine pitch from throttle, wind from airspeed.
+  // Continuous update: engine pitch from throttle, wind from airspeed,
+  // and a repeating stall warning while the wing is not flying.
   audio.update = (plane) => {
     if (!audio.ctx || audio.muted) return;
     const t = audio.ctx.currentTime;
@@ -78,6 +79,10 @@ export function createAudio() {
     audio.engineGain.gain.setTargetAtTime(engineLevel, t, 0.1);
     const windLevel = Math.min(0.16, plane.speed * 0.0011);
     audio.windGain.gain.setTargetAtTime(windLevel, t, 0.15);
+    if (plane.stalled && t - (audio.lastStallBeep || 0) > 0.55) {
+      audio.lastStallBeep = t;
+      tone(1046, 0.12, 'square', 0.07);
+    }
   };
 
   audio.setMuted = (muted) => {

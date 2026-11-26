@@ -14,8 +14,9 @@ export function stageShot(shot, mission) {
   const staged = { plane, run, rings, frozen: true, shot };
 
   if (shot === 'takeoff') {
-    // Rolling down the home runway at rotation speed, throttle full.
-    plane.z = 330;
+    // Rolling down the home runway at rotation speed, throttle full,
+    // with the whole strip stretching ahead.
+    plane.z = 120;
     plane.alt = 0;
     plane.speed = 54;
     plane.throttle = 1;
@@ -26,9 +27,11 @@ export function stageShot(shot, mission) {
 
   if (shot === 'rings') {
     // Mid-flight, banked toward the next ring, river and town below.
-    plane.z = 2950;
-    plane.x = -40;
-    plane.alt = 92;
+    // Stage relative to the actual next ring so it sits in frame.
+    const target = rings[3];
+    plane.z = target.z - 380;
+    plane.x = target.x - 60;
+    plane.alt = target.alt + 18;
     plane.speed = 72;
     plane.throttle = 0.78;
     plane.pitch = 3;
@@ -48,9 +51,9 @@ export function stageShot(shot, mission) {
 
   if (shot === 'landing') {
     // Final approach: low, slow, lined up on the home runway.
-    plane.z = -620;
+    plane.z = -350;
     plane.x = 4;
-    plane.alt = 46;
+    plane.alt = 34;
     plane.speed = 48;
     plane.throttle = 0.32;
     plane.pitch = -4;
@@ -78,17 +81,17 @@ export function stageShot(shot, mission) {
     plane.fuel = 38;
     for (const ring of rings) ring.passed = true;
     run.ringsPassed = mission.ringCount;
-    run.score = 1772; // rings 1220 + landing 212 + time bonus 340
+    run.score = 1932; // rings 1220 + landing 212 + time bonus 500
     run.breakdown = [
       'Ring 1: +118', 'Ring 2: +124', 'Ring 3: +121', 'Ring 4: +129',
       'Ring 5: +117', 'Ring 6: +122', 'Ring 7: +126', 'Ring 8: +120',
-      'Ring 9: +118', 'Ring 10: +125', 'Landing: +212', 'Time bonus: +340',
+      'Ring 9: +118', 'Ring 10: +125', 'Landing: +212', 'Time bonus: +500',
     ];
     run.landingQuality = { centreOffset: 3, sinkRate: 2.1, bonus: 212 };
     run.state = 'complete';
     run.headline = 'MISSION COMPLETE';
-    run.timeLeft = 68;
-    run.elapsed = mission.timeLimit - 68;
+    run.timeLeft = 100;
+    run.elapsed = mission.timeLimit - 100;
     return staged;
   }
 

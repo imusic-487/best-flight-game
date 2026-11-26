@@ -66,12 +66,12 @@ export function drawHud(ctx, w, h, plane, mission, score, ringsPassed, timeLeft,
   label(ctx, `RINGS ${ringsPassed}/${mission.ringCount}`, w - pad - 100, pad + 20, 11);
 
   // --- Bottom-left: throttle + fuel ------------------------------------------
-  panel(ctx, pad, h - pad - 118, 64, 118);
+  panel(ctx, pad, h - pad - 118, 92, 118);
   label(ctx, 'THR', pad + 10, h - pad - 100, 11);
   drawVerticalGauge(ctx, pad + 16, h - pad - 88, 16, 66, plane.throttle, PALETTE.hudAmber);
-  label(ctx, `${Math.round(plane.throttle * 100)}%`, pad + 38, h - pad - 52, 11);
+  label(ctx, `${Math.round(plane.throttle * 100)}%`, pad + 40, h - pad - 52, 11);
   label(ctx, 'FUEL', pad + 10, h - pad - 30, 11);
-  drawFuelBar(ctx, pad + 38, h - pad - 24, 20, plane.fuel);
+  drawFuelBar(ctx, pad + 46, h - pad - 26, 36, plane.fuel);
 
   // --- Bottom-right: attitude indicator --------------------------------------
   drawAttitude(ctx, w - pad - 118, h - pad - 118, 118, plane);
@@ -127,36 +127,46 @@ function drawWarning(ctx, w, y, text) {
 function drawCompass(ctx, w, h, plane) {
   const cx = w / 2;
   const y = 14;
-  const width = 340;
-  panel(ctx, cx - width / 2, y, width, 44);
+  const width = 360;
+  const height = 52;
+  panel(ctx, cx - width / 2, y, width, height);
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(cx - width / 2, y, width, 44, 8);
+  ctx.roundRect(cx - width / 2, y, width, height, 8);
   ctx.clip();
-  const pxPerDeg = 3.2;
+  const pxPerDeg = 3.6;
+  const range = 40;
   const heading = ((plane.heading % 360) + 360) % 360;
   const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-  for (let d = -60; d <= 60; d += 5) {
-    let deg = Math.round(heading + d);
-    deg = ((deg % 360) + 360) % 360;
+  // Tick on absolute 5-degree headings so round numbers always line up,
+  // whatever the current heading is.
+  const firstDeg = Math.floor((heading - range) / 5) * 5;
+  const lastDeg = Math.ceil((heading + range) / 5) * 5;
+  for (let absDeg = firstDeg; absDeg <= lastDeg; absDeg += 5) {
+    const d = absDeg - heading;
+    if (Math.abs(d) > range) continue;
+    const deg = ((absDeg % 360) + 360) % 360;
     const x = cx + d * pxPerDeg;
-    const major = deg % 45 === 0;
-    ctx.strokeStyle = major ? PALETTE.hudAmber : 'rgba(127, 227, 255, 0.6)';
+    const isCardinal = deg % 45 === 0;
+    const isNumbered = deg % 30 === 0;
+    const major = isCardinal || isNumbered;
+    ctx.strokeStyle = isCardinal ? PALETTE.hudAmber : 'rgba(127, 227, 255, 0.6)';
     ctx.lineWidth = major ? 2 : 1;
     ctx.beginPath();
-    ctx.moveTo(x, y + 30);
-    ctx.lineTo(x, y + (major ? 12 : 20));
+    ctx.moveTo(x, y + 34);
+    ctx.lineTo(x, y + (major ? 14 : 24));
     ctx.stroke();
-    if (major) {
+    // Labels only when they fit fully inside the strip.
+    if (Math.abs(d) > range - 8) continue;
+    ctx.textAlign = 'center';
+    if (isCardinal) {
       ctx.fillStyle = PALETTE.hudAmber;
-      ctx.font = '700 13px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(dirs[Math.round(deg / 45) % 8], x, y + 44);
-    } else if (deg % 10 === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.font = '11px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(String(deg).padStart(3, '0'), x, y + 44);
+      ctx.font = '700 14px monospace';
+      ctx.fillText(dirs[Math.round(deg / 45) % 8], x, y + 48);
+    } else if (isNumbered) {
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.font = '12px monospace';
+      ctx.fillText(String(deg).padStart(3, '0'), x, y + 48);
     }
   }
   ctx.restore();

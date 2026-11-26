@@ -21,7 +21,7 @@ export const WORLD = {
 // Flight tuning.
 export const FLIGHT = {
   maxThrottleAccel: 26, // m/s^2 at full throttle, sea level
-  dragCoefficient: 0.011,
+  dragCoefficient: 0.0035,
   pitchAuthority: 26, // deg/s of pitch at full elevator
   bankAuthority: 55, // deg/s of roll
   turnRateFactor: 0.42, // heading deg/s per deg of bank, scaled by speed

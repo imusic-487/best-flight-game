@@ -108,7 +108,8 @@ export function drawSky(ctx, w, h, plane, valley, time) {
   ctx.arc(sunX, sunY, 22, 0, Math.PI * 2);
   ctx.fill();
 
-  // Clouds drift with heading and time.
+  // Clouds drift with heading and time. Each puff is its own fill so the
+  // overlapping ellipses merge into one soft shape.
   ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
   for (const cloud of valley.clouds) {
     const cx = ((cloud.x - plane.heading * 0.004 + time * cloud.speed) % 2 + 2) % 2;
@@ -117,7 +118,11 @@ export function drawSky(ctx, w, h, plane, valley, time) {
     const s = cloud.s * w / 22;
     ctx.beginPath();
     ctx.ellipse(px, py, s, s * 0.32, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
     ctx.ellipse(px - s * 0.7, py + s * 0.1, s * 0.6, s * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
     ctx.ellipse(px + s * 0.7, py + s * 0.08, s * 0.65, s * 0.24, 0, 0, Math.PI * 2);
     ctx.fill();
   }
@@ -277,14 +282,15 @@ function drawRunway(ctx, plane, view, zStart, label) {
     ctx.textAlign = 'center';
     ctx.fillText(label, t.x, t.y - t.scale * 4);
   }
-  // Edge lights: small glowing dots along both edges.
+  // Edge lights: small glowing dots along both edges, only at a distance
+  // where they read as lights rather than blobs.
   for (let z = zStart + 20; z < zEnd; z += 90) {
     for (const side of [-1, 1]) {
       const p = project(plane, { x: side * (WORLD.runwayHalfWidth + 3), z, alt: 0 }, view);
-      if (!p || p.fwd > 2600) continue;
+      if (!p || p.fwd > 2600 || p.fwd < 150) continue;
       ctx.fillStyle = 'rgba(255, 220, 120, 0.9)';
       ctx.beginPath();
-      ctx.arc(p.x, p.y, Math.max(1.5, p.scale * 0.9), 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, Math.max(1.5, Math.min(4, p.scale * 0.9)), 0, Math.PI * 2);
       ctx.fill();
     }
   }

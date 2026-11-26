@@ -88,7 +88,7 @@ export function updateFlight(state, input, dt, mission) {
   const drag = FLIGHT.dragCoefficient * state.speed * state.speed;
   const pitchDrag = Math.abs(Math.sin(state.pitch * DEG)) * state.speed * 0.55;
   const brakeDrag = input.brake ? state.speed * 1.4 : 0;
-  const groundDrag = state.onGround ? 6 : 0;
+  const groundDrag = state.onGround ? 2 : 0;
   state.speed += (thrust - drag - pitchDrag - brakeDrag - groundDrag) * dt;
   state.speed = Math.max(0, Math.min(WORLD.maxSpeed, state.speed));
 
@@ -172,14 +172,15 @@ export function updateFlight(state, input, dt, mission) {
     }
     state.onGround = true;
     state.verticalSpeed = 0;
-    // Rolling on the ground: keep the nose level, bleed speed slowly.
-    if (state.speed < 2) state.speed = 0;
-  } else if (state.alt > ground + 0.5) {
-    if (state.onGround && state.speed > 52 && state.pitch > 4) {
+    // Rolling on the ground: with the throttle closed the plane rolls to a stop.
+    if (state.throttle < 0.05 && state.speed < 2) state.speed = 0;
+    // Rotation: fast enough and pulling back lifts her off the runway.
+    if (state.speed > 45 && state.pitch > 4) {
       state.onGround = false;
       return 'takeoff';
     }
-    if (state.onGround && state.alt > ground + 2) state.onGround = false;
+  } else if (state.alt > ground + 0.5) {
+    if (state.onGround) state.onGround = false;
   }
 
   // Terrain scrape while low and fast over the hills.

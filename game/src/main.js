@@ -47,6 +47,10 @@ const game = {
   paused: false,
 };
 
+// Debug hook for automated play-tests: the live game object, read-only in
+// practice. Harmless in production; the game never reads it back.
+window.__skylineValley = game;
+
 function startMission(index) {
   const mission = MISSIONS[index];
   game.plane = createFlightState(mission);
@@ -221,11 +225,19 @@ if (shotName) {
     game.rings = staged.rings;
     game.mode = 'shot';
     // One frozen render; no loop needed, but keep the loop harmless.
-    renderFrame(ctx, window.innerWidth, window.innerHeight, game);
+    // The 'end' shot shows the mission-complete screen over the last frame.
+    const renderShot = () => {
+      if (shotName === 'end') {
+        renderEndScreen(ctx, window.innerWidth, window.innerHeight, game);
+      } else {
+        renderFrame(ctx, window.innerWidth, window.innerHeight, game);
+      }
+    };
+    renderShot();
     document.title = `${GAME_NAME} — ${shotName}`;
     // Keep rendering the same frozen frame so the shot is stable.
     requestAnimationFrame(function frozen() {
-      renderFrame(ctx, window.innerWidth, window.innerHeight, game);
+      renderShot();
       requestAnimationFrame(frozen);
     });
   }

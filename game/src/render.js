@@ -26,8 +26,8 @@ export function renderFrame(ctx, w, h, game) {
   ctx.restore();
 
   // Aircraft and HUD are drawn unrotated so the pilot can always read them.
-  const planeY = h * 0.66;
-  const planeWidth = Math.min(300, w * 0.24);
+  const planeY = h * 0.64;
+  const planeWidth = Math.min(320, w * 0.26);
   drawAircraft(ctx, w / 2, planeY, planeWidth, plane, time);
 
   if (game.mode === 'flying' || game.mode === 'shot') {
@@ -46,7 +46,7 @@ export function renderTitle(ctx, w, h, game) {
   drawSky(ctx, w, h, plane, valley, time);
   drawGround(ctx, w, h, plane, valley, horizonY);
   drawRings(ctx, plane, rings, view, time);
-  drawAircraft(ctx, w / 2, h * 0.66, Math.min(300, w * 0.24), plane, time);
+  drawAircraft(ctx, w / 2, h * 0.64, Math.min(320, w * 0.26), plane, time);
 
   // Dim the world so the menu reads.
   ctx.fillStyle = 'rgba(8, 16, 28, 0.45)';
@@ -66,7 +66,7 @@ export function renderTitle(ctx, w, h, game) {
 
   // Mission cards.
   const cardW = 300;
-  const cardH = 118;
+  const cardH = 140;
   const gap = 24;
   const totalW = cardW * 3 + gap * 2;
   const startX = (w - totalW) / 2;
@@ -86,12 +86,12 @@ export function renderTitle(ctx, w, h, game) {
     ctx.fillText(`${mission.key} · ${mission.name}`, w / 2 + (x + cardW / 2 - w / 2), cardY + 34);
     ctx.fillStyle = '#eaf6ff';
     ctx.font = '14px monospace';
-    wrapText(ctx, mission.blurb, x + cardW / 2, cardY + 62, cardW - 28, 20);
+    wrapText(ctx, mission.blurb, x + cardW / 2, cardY + 60, cardW - 28, 19);
     ctx.fillStyle = 'rgba(234, 246, 255, 0.75)';
     ctx.font = '13px monospace';
     ctx.fillText(
       `${mission.ringCount} rings · ${Math.floor(mission.timeLimit / 60)}:${String(mission.timeLimit % 60).padStart(2, '0')} · fuel ${mission.fuelStart}`,
-      x + cardW / 2, cardY + 100,
+      x + cardW / 2, cardY + 124,
     );
   });
 
@@ -131,7 +131,7 @@ export function renderEndScreen(ctx, w, h, game) {
   ctx.fillRect(0, 0, w, h);
 
   const panelW = 560;
-  const panelH = 430;
+  const panelH = 470;
   const x = (w - panelW) / 2;
   const y = (h - panelH) / 2;
   ctx.fillStyle = 'rgba(10, 18, 30, 0.88)';
@@ -161,7 +161,7 @@ export function renderEndScreen(ctx, w, h, game) {
   ctx.fillStyle = '#cfe8ff';
   ctx.font = '15px monospace';
   let ly = y + 208;
-  for (const line of run.breakdown.slice(-8)) {
+  for (const line of run.breakdown.slice(-7)) {
     ctx.fillText(line, x + 40, ly);
     ly += 24;
   }
@@ -169,7 +169,7 @@ export function renderEndScreen(ctx, w, h, game) {
     ctx.fillStyle = PALETTE.hudGreen;
     ctx.fillText(
       `Landing: ${run.landingQuality.centreOffset}m off centre, sink ${run.landingQuality.sinkRate} m/s — bonus ${run.landingQuality.bonus}`,
-      x + 40, ly + 4,
+      x + 40, ly + 6,
     );
   }
 

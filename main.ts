@@ -10,7 +10,7 @@
 // The run is deterministic: same repository, same bytes in /output, so the
 // grader's two runs agree byte for byte.
 
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -41,3 +41,15 @@ const dossier = buildDossier(outDir, {
   game_path_max_bytes: 1000,
 });
 writeFileSync(join(outDir, 'dossier.json'), dossier);
+
+// Sanity-check the hand-in before reporting success: the dossier must fit
+// the scorer's 1.5 MiB cap, and there must be 3 or 4 screenshots.
+const dossierBytes = Buffer.byteLength(dossier);
+if (dossierBytes > 1572864) {
+  throw new Error(`dossier.json is ${dossierBytes} bytes, over the 1.5 MiB cap`);
+}
+const shotCount = readdirSync(join(outDir, 'screenshots')).length;
+if (shotCount < 3 || shotCount > 4) {
+  throw new Error(`expected 3 or 4 screenshots, found ${shotCount}`);
+}
+console.log(`handed in: dossier.json ${dossierBytes} bytes, ${shotCount} screenshots`);

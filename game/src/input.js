@@ -44,7 +44,13 @@ export function createInput(canvas) {
   }
 
   function sync() {
-    for (const [code, field] of Object.entries(KEYMAP)) input[field] = keys.has(code);
+    // Several keys share one control (arrows and IJKL): OR them, so the
+    // second key in the map cannot switch off the first.
+    const next = {};
+    for (const [code, field] of Object.entries(KEYMAP)) {
+      next[field] = (next[field] ?? false) || keys.has(code);
+    }
+    for (const [field, value] of Object.entries(next)) input[field] = value;
   }
 
   function onMouseMove(event) {
